@@ -43,8 +43,9 @@ __all__ = [
 
 
 class H5Driver(object):
-    def __init__(self, device=None):
+    def __init__(self, device=None, app="com.tencent.mm:tools"):
         self._device = device
+        self._app = app
         self._urlFetcher = None
         self._webSocketDataTransfer = None
         self._vmShutdownHandler = VMShutDownHandler()
@@ -66,7 +67,7 @@ class H5Driver(object):
         UncaughtExceptionHandler.registerUncaughtExceptionCallback(self._onUncaughtException)
 
         self._selectDevice()
-        self._urlFetcher = H5WebSocketDebugUrlFetcher(device=self._device)
+        self._urlFetcher = H5WebSocketDebugUrlFetcher(device=self._device,app=self._app)
         url = self._urlFetcher.fetchWebSocketDebugUrl()
 
         self._webSocketDataTransfer = WebSocketDataTransfer(url=url)

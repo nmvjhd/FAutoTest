@@ -15,18 +15,22 @@ from fastAutoTest.utils.common import OS
 from fastAutoTest.utils.logger import Log
 import time
 
-_ADB_FIND_STR_CMD = {
-    "Darwin": "adb shell ps | grep -w com.tencent.mm:tools",  # Mac os 下查找字符串是grep
-    "Linux": "adb shell ps | grep -w com.tencent.mm:tools",  # Mac os 下查找字符串是grep
-    "Windows": "adb shell ps | findstr /e com.tencent.mm:tools"  # windows 下查找字符串是findstr
-}
+
+def getCMD(os, app):
+    _ADB_FIND_STR_CMD = {
+        "Darwin": "adb shell ps | grep -w ",  # Mac os 下查找字符串是grep
+        "Linux": "adb shell ps | grep -w ",  # Mac os 下查找字符串是grep
+        "Windows": "adb shell ps | findstr /e "  # windows 下查找字符串是findstr
+    }
+    return _ADB_FIND_STR_CMD[os] + app
 
 
 class H5WebSocketDebugUrlFetcher(object):
     DEFAULT_LOCAL_FORWARD_PORT = 9222
 
-    def __init__(self, device, localForwardPort=None):
+    def __init__(self, device, app=None, localForwardPort=None):
         self._device = device
+        self._app = app
         self._localForwardPort = localForwardPort if localForwardPort is not None \
             else H5WebSocketDebugUrlFetcher.DEFAULT_LOCAL_FORWARD_PORT
         self._webSocketDebugUrl = None
@@ -46,7 +50,7 @@ class H5WebSocketDebugUrlFetcher(object):
 
     def _fetchInner(self):
         # 先获取微信Tools进程Pid
-        pid = H5WebSocketDebugUrlFetcher._fetchWeixinToolsProcessPid(device=self._device)
+        pid = H5WebSocketDebugUrlFetcher._fetchWeixinToolsProcessPid(device=self._device, app=self._app)
 
         # 重定向端口
         H5WebSocketDebugUrlFetcher._forwardLocalPort(self._localForwardPort, pid, device=self._device)
@@ -55,7 +59,7 @@ class H5WebSocketDebugUrlFetcher(object):
         self._webSocketDebugUrl = self._fetchWebSocketDebugUrl(self._localForwardPort)
 
     @staticmethod
-    def _fetchWeixinToolsProcessPid(device=None):
+    def _fetchWeixinToolsProcessPid(device=None, app=None):
 
         """
 
@@ -73,13 +77,13 @@ class H5WebSocketDebugUrlFetcher(object):
 
         """
         osName = OS.getPlatform()
-        cmd = _ADB_FIND_STR_CMD[osName]
+        cmd = getCMD(osName, app)
 
         stdout = H5WebSocketDebugUrlFetcher._getProcessInfo(cmd, device)
 
         weixinProcessInfoLine = None
         for processInfo in stdout.split("\r\r\n"):
-            if "com.tencent.mm:tools" in processInfo:
+            if app in processInfo:
                 weixinProcessInfoLine = processInfo
                 break
 
