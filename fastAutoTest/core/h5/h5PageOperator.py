@@ -53,12 +53,13 @@ class H5PageOperator(object):
 
         commandList.append(keydownCommand)
 
-        # textEvent的command,需要将字符串分割成每四个字符为一小段
+        # textEvent的command,需要将字符串分割成每三个字符为一小段
         unicodeText = unicode(text, 'utf-8')
         length = len(unicodeText)
-        i = length / 4 if length % 4 == 0 else length / 4 + 1
+        charUnit = 3    # 每次输入四个字符有bug，改为三个
+        i = length / charUnit if length % charUnit == 0 else length / charUnit + 1
         for j in range(i):
-            inputtext = unicodeText[4 * j: 4 * (j + 1)]
+            inputtext = unicodeText[charUnit * j: charUnit * (j + 1)]
             charParams = {"type": "char", "text": inputtext}
             charCommand = self.processor.doCommandWithoutElement(
                 h5UserAPI.ActionType.TEXT, **charParams)
