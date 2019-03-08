@@ -501,6 +501,7 @@ class H5Driver(object):
         :param script:要执行的js指令
         :return: 执行结果
         """
+        script = script.replace('"', '\\"')  # 在双引号前加个转义符，解决带双引号的script执行json报错问题
         executeCmd = self._pageOperator.executeScript(script)
         resultValueDict = self._networkHandler.send(executeCmd).getResponse()[0]
 
